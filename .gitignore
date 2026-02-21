@@ -1,0 +1,30 @@
+# Build directory
+build/
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# Pico build outputs
+*.elf
+*.bin
+*.uf2
+*.map
+*.hex
+
+# Object / dependency files
+*.o
+*.d
+
+# Editor
+*.swp
+*.swo
+*~
+session.nvim
+
+# OS
+.DS_Store
+.vscode/
+.idea/
+.cache/
