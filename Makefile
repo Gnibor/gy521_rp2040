@@ -4,6 +4,7 @@ default:
 	$(MAKE) -C $(BUILD_DIR)
 
 all:
+	cp -f $(PICO_SDK_PATH)/external/pico_sdk_import.cmake .
 	mkdir -p $(BUILD_DIR)
 	cd $(BUILD_DIR) && cmake .. && make
 
