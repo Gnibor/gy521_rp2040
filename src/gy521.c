@@ -30,7 +30,7 @@ bool gy521_test_connection(void) {
     uint8_t who_am_i = 0;
     i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){0x75}, 1, true);
     i2c_read_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, &who_am_i, 1, false);
-    return who_am_i == (bool) 0x68;
+    return who_am_i == 0x68;
 }
 
 void gy521_read_raw(int16_t* ax, int16_t* ay, int16_t* az,

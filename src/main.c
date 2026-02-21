@@ -39,7 +39,7 @@ int main(void) {
 	while (1) {
 		int16_t ax, ay, az, gx, gy, gz;
 		gy521_read_raw(&ax, &ay, &az, &gx, &gy, &gz);
-		printf("A: %6d %6d %6d | G: %6d %6d %6d\n", ax, ay, az, gx, gy, gz);
+		printf("A=X:%6d Y:%6d Z:%6d | G=X:%6d Y:%6d Z:%6d\n", ax, ay, az, gx, gy, gz);
 		sleep_ms(500);
 	}
 }
