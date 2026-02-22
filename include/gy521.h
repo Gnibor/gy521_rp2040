@@ -1,6 +1,7 @@
 #pragma once
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
+#include <sys/types.h>
 
 // === Konfigurierbare Hardware ===
 #ifndef GY521_I2C_PORT
@@ -27,8 +28,34 @@
 #define GY521_I2C_ADDR 0x68
 #endif
 
+#define GY521_AFS 0
+#define GY521_GFS 1
+
+#define GY521_GFS_SEL_250 0x00
+#define GY521_GFS_SEL_500 0x08
+#define GY521_GFS_SEL_1000 0x10
+#define GY521_GFS_SEL_2000 0x18
+
+#define GY521_AFS_SEL_2 0x00
+#define GY521_AFS_SEL_4 0x08
+#define GY521_AFS_SEL_8 0x10
+#define GY521_AFS_SEL_16 0x18
+
+typedef struct {
+    int16_t ax, ay, az;
+    int16_t gx, gy, gz;
+    int16_t temp;
+} gy521_raw_t;
+
+typedef struct {
+    float ax, ay, az;
+    float gx, gy, gz;
+    float temp;
+} gy521_scaled_t;
+
 // === Funktionsdeklarationen ===
 void gy521_init(void);
 bool gy521_test_connection(void);
-void gy521_read_raw(int16_t* ax, int16_t* ay, int16_t* az,
-                    int16_t* gx, int16_t* gy, int16_t* gz);
+bool gy521_set_fs( bool xfs, u_int16_t xfs_sel);
+bool gy521_read_raw(gy521_raw_t *data);
+bool gy521_read_scaled(gy521_scaled_t *out);

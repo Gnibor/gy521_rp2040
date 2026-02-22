@@ -24,22 +24,38 @@ void stdio_init_board(void) {
 #endif
 }
 
+
+gy521_scaled_t gy521;
+
+
+
 int main(void) {
 	stdio_init_board();
-	printf("test");
+	printf("test\n");
 	gy521_init();
 
-	if (!gy521_test_connection()) {
+	int retries = 3;
+	bool connected = false;
+	while (!(connected = gy521_test_connection()) && retries--){
+		printf("Retrying...\n");
+		sleep_ms(500);
+	}
+	if (retries < 0) {
 		printf("GY-521 nicht gefunden!\n");
-		while (1) tight_loop_contents();
+		while(1) tight_loop_contents();
 	}
 
 	printf("GY-521 bereit!\n");
 
+	bool ret = gy521_set_fs(GY521_AFS, GY521_AFS_SEL_4);
+	while(!ret) tight_loop_contents();
+	ret = gy521_set_fs(GY521_GFS, GY521_GFS_SEL_1000);
+	while(!ret) tight_loop_contents();
+
 	while (1) {
-		int16_t ax, ay, az, gx, gy, gz;
-		gy521_read_raw(&ax, &ay, &az, &gx, &gy, &gz);
-		printf("A=X:%6d Y:%6d Z:%6d | G=X:%6d Y:%6d Z:%6d\n", ax, ay, az, gx, gy, gz);
-		sleep_ms(500);
+		if(gy521_read_scaled(&gy521))
+			printf("G=X:%6.3f Y:%6.3f Z:%6.3f | °C=%6.2f | °/s=X:%8.3f Y:%8.3f Z:%8.3f\n", 
+				gy521.ax, gy521.ay, gy521.az, gy521.temp, gy521.gx, gy521.gy, gy521.gz);
+		sleep_ms(250);
 	}
 }
