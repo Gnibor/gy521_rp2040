@@ -4,23 +4,24 @@
 
 #define GY521_REG_PWR_MGMT_1 0x6B
 #define GY521_REG_ACCEL_XOUT_H 0x3B
+#define GY521_REG_TEMP_OUT_H 0x41
 #define GY521_REG_GYRO_XOUT_H  0x43
-#define GY521_REG_GYRO_CONFIG 0x1b
 #define GY521_REG_ACCEL_CONFIG 0x1c
+#define GY521_REG_GYRO_CONFIG 0x1b
 #define GY521_REG_WHO_AM_I 0x75
 
-#define GY521_GFS_DIV_250 131.0f
-#define GY521_GFS_DIV_500 65.5f
-#define GY521_GFS_DIV_1000 32.8f
-#define GY521_GFS_DIV_2000 16.4f
+#define GY521_ACCEL_LSB_2G 16384.0f
+#define GY521_ACCEL_LSB_4G 8129.0f
+#define GY521_ACCEL_LSB_8G 4096.0f
+#define GY521_ACCEL_LSB_16G 2048.0f
 
-#define GY521_AFS_DIV_2 16384.0f
-#define GY521_AFS_DIV_4 8129.0f
-#define GY521_AFS_DIV_8 4096.0f
-#define GY521_AFS_DIV_16 2048.0f
+#define GY521_GYRO_LSB_250DPS 131.0f
+#define GY521_GYRO_LSB_500DPS 65.5f
+#define GY521_GYRO_LSB_1000DPS 32.8f
+#define GY521_GYRO_LSB_2000DPS 16.4f
 
-static float gy521_gfs_div = GY521_GFS_DIV_250;
-static float gy521_afs_div = GY521_AFS_DIV_2;
+static float gy521_gyro_lsb = GY521_GYRO_LSB_250DPS;
+static float gy521_accel_lsb = GY521_ACCEL_LSB_2G;
 
 void gy521_init(void) {
 	i2c_init(GY521_I2C_PORT, 400 * 1000);
@@ -49,22 +50,22 @@ bool gy521_test_connection(void) {
 	return who_am_i == 0x68;
 }
 
-bool gy521_set_fs(bool xfs, u_int16_t xfs_sel){
+bool gy521_set_fs(bool gyro_accel_fs, u_int16_t xfs_sel){
 	u_int16_t addr = GY521_REG_ACCEL_CONFIG;
-	if(xfs){
+	if(gyro_accel_fs){
 		addr = GY521_REG_GYRO_CONFIG;
-		if(xfs_sel == GY521_GFS_SEL_500) gy521_gfs_div = GY521_GFS_DIV_500;
-		else if(xfs_sel == GY521_GFS_SEL_1000) gy521_gfs_div = GY521_GFS_DIV_1000;
-		else if(xfs_sel == GY521_GFS_SEL_2000) gy521_gfs_div = GY521_GFS_DIV_2000;
-		else gy521_gfs_div = GY521_GFS_DIV_250;
+		if(xfs_sel == GY521_GYRO_FS_SEL_500DPS) gy521_gyro_lsb = GY521_GYRO_LSB_500DPS;
+		else if(xfs_sel == GY521_GYRO_FS_SEL_1000DPS) gy521_gyro_lsb = GY521_GYRO_LSB_1000DPS;
+		else if(xfs_sel == GY521_GYRO_FS_SEL_2000DPS) gy521_gyro_lsb = GY521_GYRO_LSB_2000DPS;
+		else gy521_gyro_lsb = GY521_GYRO_LSB_250DPS;
 	}else{
-		if(xfs_sel == GY521_AFS_SEL_4) gy521_afs_div = GY521_AFS_DIV_4;
-		else if(xfs_sel == GY521_AFS_SEL_8) gy521_afs_div = GY521_AFS_DIV_8;
-		else if(xfs_sel == GY521_AFS_SEL_16) gy521_afs_div = GY521_AFS_DIV_16;
-		else gy521_afs_div = GY521_AFS_DIV_2;
+		if(xfs_sel == GY521_ACCEL_FS_SEL_4G) gy521_accel_lsb = GY521_ACCEL_LSB_4G;
+		else if(xfs_sel == GY521_ACCEL_FS_SEL_8G) gy521_accel_lsb = GY521_ACCEL_LSB_8G;
+		else if(xfs_sel == GY521_ACCEL_FS_SEL_16G) gy521_accel_lsb = GY521_ACCEL_LSB_16G;
+		else gy521_accel_lsb = GY521_ACCEL_LSB_2G;
 	}
 
-	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){addr, xfs_sel}, 2, true);
+	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){addr, xfs_sel}, 2, false);
 	
 	if(ret < 0) return 0;
 
@@ -96,12 +97,12 @@ bool gy521_read_raw(gy521_raw_t *out) {
 bool gy521_read_scaled(gy521_scaled_t *out){
 	gy521_raw_t imu;
 	if (gy521_read_raw(&imu)) {
-		out->ax = imu.ax / gy521_afs_div;
-		out->ay = imu.ay / gy521_afs_div;
-		out->az = imu.az / gy521_afs_div;
-		out->gx = imu.gx / gy521_gfs_div;
-		out->gy = imu.gy / gy521_gfs_div;
-		out->gz = imu.gz / gy521_gfs_div;
+		out->ax = imu.ax / gy521_accel_lsb;
+		out->ay = imu.ay / gy521_accel_lsb;
+		out->az = imu.az / gy521_accel_lsb;
+		out->gx = imu.gx / gy521_gyro_lsb;
+		out->gy = imu.gy / gy521_gyro_lsb;
+		out->gz = imu.gz / gy521_gyro_lsb;
 		out->temp = (imu.temp / 340.0f) + 36.53f;
 		return true;
 	}

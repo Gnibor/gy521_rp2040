@@ -3,6 +3,7 @@ build/
 
 # CMake
 CMakeFiles/
+datasheet/
 CMakeCache.txt
 cmake_install.cmake
 

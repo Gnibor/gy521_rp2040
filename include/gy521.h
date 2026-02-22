@@ -28,18 +28,18 @@
 #define GY521_I2C_ADDR 0x68
 #endif
 
-#define GY521_AFS 0
-#define GY521_GFS 1
+#define GY521_GYRO_FS 1
+#define GY521_ACCEL_FS 0
 
-#define GY521_GFS_SEL_250 0x00
-#define GY521_GFS_SEL_500 0x08
-#define GY521_GFS_SEL_1000 0x10
-#define GY521_GFS_SEL_2000 0x18
+#define GY521_ACCEL_FS_SEL_2G 0x00
+#define GY521_ACCEL_FS_SEL_4G 0x08
+#define GY521_ACCEL_FS_SEL_8G 0x10
+#define GY521_ACCEL_FS_SEL_16G 0x18
 
-#define GY521_AFS_SEL_2 0x00
-#define GY521_AFS_SEL_4 0x08
-#define GY521_AFS_SEL_8 0x10
-#define GY521_AFS_SEL_16 0x18
+#define GY521_GYRO_FS_SEL_250DPS 0x00
+#define GY521_GYRO_FS_SEL_500DPS 0x08
+#define GY521_GYRO_FS_SEL_1000DPS 0x10
+#define GY521_GYRO_FS_SEL_2000DPS 0x18
 
 typedef struct {
     int16_t ax, ay, az;
