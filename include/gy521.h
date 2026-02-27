@@ -162,6 +162,7 @@ typedef struct gy521_s{
 		bool (*sleep)(bool);
 		bool (*read)(struct gy521_s (*), uint8_t, bool);
 		bool (*set_fsr)(struct gy521_s (*));
+		bool (*set_stby)(struct gy521_s (*));
 		bool (*clksel)(struct gy521_s (*));
 
 		struct{

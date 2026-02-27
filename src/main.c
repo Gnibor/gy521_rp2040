@@ -28,6 +28,11 @@ int main(void){
 	gy521.conf.gyro.x.clksel = true;
 	if(gy521.fn.clksel(&gy521)) printf("GY-521 Clock Select set to GyroX\n");
 
+	gy521.conf.gyro.y.stby = true;
+	gy521.conf.gyro.z.stby = true;
+	gy521.conf.accel.z.stby = true;
+	if(gy521.fn.set_stby(&gy521)) printf("YG,ZG,ZA in standby\n");
+
 	printf("Try to calibrate GY-521\n");
 	sleep_ms(2000);
 	if(gy521.fn.gyro.calibrate(15)) printf("GY-521 is now calibrated.\n");

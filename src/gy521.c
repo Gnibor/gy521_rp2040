@@ -1,6 +1,7 @@
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 #include <stdint.h>
+#include <stdio.h>
 #include "gy521.h"
 
 // ==========================================
@@ -49,10 +50,11 @@ bool gy521_read_reg(uint8_t reg, uint8_t *out, uint8_t how_many);
 bool gy521_sleep(bool aktiv); // true = enable, false = disable
 bool gy521_set_fsr(gy521_s *gy521); // automatically calculate scaling factors
 bool gy521_set_clksel(gy521_s *gy521);
+bool gy521_set_stby(gy521_s *gy521);
 bool gy521_calibrate_gyro(uint8_t sample); // calibrate gyro offsets
 bool gy521_read(gy521_s *out, uint8_t accel_temp_gyro, bool scaled); // 0=all, scaled=true -> G/°C/°/s
 
-typedef struct {
+typedef struct{
 	int32_t x, y, z;
 } gy521_offset_t;
 
@@ -65,7 +67,7 @@ static uint8_t gy521_cache[14]={0}; // temporary buffer for I2C reads
 // ========================
 // === Initialize GY521 ===
 // ========================
-gy521_s gy521_init(void) {
+gy521_s gy521_init(void){
 	i2c_init(GY521_I2C_PORT, 400 * 1000); // 400 kHz I2C
 	gpio_set_function(GY521_SDA_PIN, GPIO_FUNC_I2C);
 	gpio_set_function(GY521_SCL_PIN, GPIO_FUNC_I2C);
@@ -76,7 +78,7 @@ gy521_s gy521_init(void) {
 #endif
 
 	// Configure optional interrupt pin
-	if (GY521_INT_PIN >= 0) {
+	if (GY521_INT_PIN >= 0){
 		gpio_init(GY521_INT_PIN);
 		gpio_set_dir(GY521_INT_PIN, GPIO_IN);
 	}
@@ -84,13 +86,14 @@ gy521_s gy521_init(void) {
 	// Initalize device struct and function pointers
 	gy521_s gy521 = {0};
 	gy521.conf.accel.fsr_divider = 131.0f;
-	gy521.conf.gyro.fsr_divider = 16384;
+	gy521.conf.gyro.fsr_divider = 16384.0f;
 	gy521.conf.gyro.x.clksel = true;
 	gy521.fn.sleep = &gy521_sleep;
 	gy521.fn.test_connection = &gy521_test_connection;
 	gy521.fn.read = &gy521_read;
 	gy521.fn.gyro.calibrate = &gy521_calibrate_gyro;
 	gy521.fn.set_fsr = &gy521_set_fsr;
+	gy521.fn.set_stby = &gy521_set_stby;
 	gy521.fn.clksel = &gy521_set_clksel;
 	return gy521;
 }
@@ -111,10 +114,27 @@ bool gy521_read_register(uint8_t reg, uint8_t *out, uint8_t how_many){
 // =======================
 // === Test Connection ===
 // =======================
-bool gy521_test_connection(void) {
+bool gy521_test_connection(void){
 	uint8_t who_am_i;
 	if(!gy521_read_register(GY521_REG_WHO_AM_I, &who_am_i, 1)) return false;
 	return who_am_i == 0x68 ? true : false;
+}
+
+bool gy521_set_stby(gy521_s *gy521){
+	if(!gy521_read_register(GY521_REG_PWR_MGMT_2, gy521_cache, 1)) return false;
+
+	if(gy521->conf.gyro.x.stby && !(gy521_cache[0] & GY521_STBY_XG)) gy521_cache[0] |= GY521_STBY_XG;
+	if(gy521->conf.gyro.y.stby && !(gy521_cache[0] & GY521_STBY_YG)) gy521_cache[0] |= GY521_STBY_YG;
+	if(gy521->conf.gyro.z.stby && !(gy521_cache[0] & GY521_STBY_ZG)) gy521_cache[0] |= GY521_STBY_ZG;
+
+	if(gy521->conf.accel.x.stby && !(gy521_cache[0] & GY521_STBY_XA)) gy521_cache[0] |= GY521_STBY_XA;
+	if(gy521->conf.accel.y.stby && !(gy521_cache[0] & GY521_STBY_YA)) gy521_cache[0] |= GY521_STBY_YA;
+	if(gy521->conf.accel.z.stby && !(gy521_cache[0] & GY521_STBY_ZA)) gy521_cache[0] |= GY521_STBY_ZA;
+
+	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){ GY521_REG_PWR_MGMT_2, gy521_cache[0]}, 2, false);
+	if(ret < 0) return false;
+
+	return true;
 }
 
 bool gy521_set_clksel(gy521_s *gy521){
@@ -225,7 +245,7 @@ bool gy521_calibrate_gyro(uint8_t samples){
 // ===========================================
 // === Read Sensor Data + Optional Scaling ===
 // ===========================================
-bool gy521_read(gy521_s *gy521, uint8_t accel_temp_gyro, bool scaled) {
+bool gy521_read(gy521_s *gy521, uint8_t accel_temp_gyro, bool scaled){
 	// Read all sensors
 	if(accel_temp_gyro == 0){
 		if(!gy521_read_register(GY521_REG_ACCEL_XOUT_H, gy521_cache, 14)) return false;
