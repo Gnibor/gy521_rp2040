@@ -23,7 +23,7 @@ int main(void){
 
 	if(gy521.fn.reset()) printf("GY-521 got reset\n");
 
-	gy521.fn.sleep(false);
+	if(gy521.fn.sleep(false)) printf("GY-521 sleep stop\n");
 
 	gy521.conf.accel.fsr = GY521_ACCEL_FSR_SEL_8G;
 	gy521.conf.gyro.fsr = GY521_GYRO_FSR_SEL_2000DPS;
@@ -32,8 +32,8 @@ int main(void){
 	gy521.conf.gyro.x.clksel = true;
 	if(gy521.fn.clksel(&gy521)) printf("GY-521 Clock Select set to GyroX\n");
 
-	gy521.conf.accel.z.stby = true;
-	if(gy521.fn.set_stby(&gy521)) printf("YG,ZG,ZA in standby\n");
+	gy521.conf.accel.y.stby = true;
+	if(gy521.fn.set_stby(&gy521)) printf("YA in standby\n");
 
 	printf("Try to calibrate GY-521\n");
 	sleep_ms(2000);

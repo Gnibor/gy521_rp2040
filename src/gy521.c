@@ -1,7 +1,6 @@
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 #include <stdint.h>
-#include <stdio.h>
 #include "gy521.h"
 
 // ==========================================
@@ -44,7 +43,9 @@
 #define GY521_STBY_YG (1 << 1)
 #define GY521_STBY_ZG 0x01
 
-// Function prototypes
+// ===========================
+// === Function prototypes ===
+// ===========================
 bool gy521_test_connection(void);
 bool gy521_read_reg(uint8_t reg, uint8_t *out, uint8_t how_many);
 bool gy521_reset(void);
@@ -122,26 +123,32 @@ bool gy521_test_connection(void){
 	return who_am_i == 0x68 ? true : false;
 }
 
+// ==========================
+// === Reset GY521 device ===
+// ==========================
 bool gy521_reset(void){
 	if(!gy521_read_register(GY521_REG_PWR_MGMT_1, gy521_cache, 1)) return false;
 	gy521_cache[0] |= GY521_DEVICE_RESET;
 
-	uint8_t ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){GY521_REG_PWR_MGMT_1, gy521_cache[0]}, 1, false);
+	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){GY521_REG_PWR_MGMT_1, gy521_cache[0]}, 1, false);
 	if(ret < 0) return false;
 
 	return true;
 }
 
+// ==========================================
+// === Set Standby in Register PWR_MGMT_2 ===
+// ==========================================
 bool gy521_set_stby(gy521_s *gy521){
 	if(!gy521_read_register(GY521_REG_PWR_MGMT_2, gy521_cache, 1)) return false;
 
-	if(gy521->conf.gyro.x.stby && !(gy521_cache[0] & GY521_STBY_XG)) gy521_cache[0] |= GY521_STBY_XG;
-	if(gy521->conf.gyro.y.stby && !(gy521_cache[0] & GY521_STBY_YG)) gy521_cache[0] |= GY521_STBY_YG;
-	if(gy521->conf.gyro.z.stby && !(gy521_cache[0] & GY521_STBY_ZG)) gy521_cache[0] |= GY521_STBY_ZG;
+	if(gy521->conf.gyro.x.stby) gy521_cache[0] |= GY521_STBY_XG;
+	if(gy521->conf.gyro.y.stby) gy521_cache[0] |= GY521_STBY_YG;
+	if(gy521->conf.gyro.z.stby) gy521_cache[0] |= GY521_STBY_ZG;
 
-	if(gy521->conf.accel.x.stby && !(gy521_cache[0] & GY521_STBY_XA)) gy521_cache[0] |= GY521_STBY_XA;
-	if(gy521->conf.accel.y.stby && !(gy521_cache[0] & GY521_STBY_YA)) gy521_cache[0] |= GY521_STBY_YA;
-	if(gy521->conf.accel.z.stby && !(gy521_cache[0] & GY521_STBY_ZA)) gy521_cache[0] |= GY521_STBY_ZA;
+	if(gy521->conf.accel.x.stby) gy521_cache[0] |= GY521_STBY_XA;
+	if(gy521->conf.accel.y.stby) gy521_cache[0] |= GY521_STBY_YA;
+	if(gy521->conf.accel.z.stby) gy521_cache[0] |= GY521_STBY_ZA;
 
 	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){ GY521_REG_PWR_MGMT_2, gy521_cache[0]}, 2, false);
 	if(ret < 0) return false;
@@ -149,16 +156,16 @@ bool gy521_set_stby(gy521_s *gy521){
 	return true;
 }
 
+// ==========================================
+// === Set CLK_SEL in Register PWR_MGMT_1 ===
+// ==========================================
 bool gy521_set_clksel(gy521_s *gy521){
-	if(gy521->conf.clksel == 0){
-		if(gy521->conf.gyro.x.clksel) gy521->conf.clksel = GY521_CLKSEL_GYRO_X;
-		else if(gy521->conf.gyro.y.clksel) gy521->conf.clksel = GY521_CLKSEL_GYRO_Y;
-		else if (gy521->conf.gyro.z.clksel) gy521->conf.clksel = GY521_CLKSEL_GYRO_Z;
-	}
+	if(gy521->conf.gyro.x.clksel) gy521->conf.clksel = GY521_CLKSEL_GYRO_X;
+	else if(gy521->conf.gyro.y.clksel) gy521->conf.clksel = GY521_CLKSEL_GYRO_Y;
+	else if (gy521->conf.gyro.z.clksel) gy521->conf.clksel = GY521_CLKSEL_GYRO_Z;
 
 	if(!gy521_read_register(GY521_REG_PWR_MGMT_1, gy521_cache, 1)) return false;
-	gy521_cache[0] &= ~0x07;
-	gy521_cache[0] &= ~0x40; // clear sleep
+	gy521_cache[0] &= ~0x47; // clear sleep & CLK_SEL
 	gy521_cache[0] |= gy521->conf.clksel;
 
 	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){ GY521_REG_PWR_MGMT_1, gy521_cache[0]}, 2, false);
@@ -179,7 +186,6 @@ bool gy521_sleep(bool aktiv){
 
 	if(aktiv && !is_set) reg_entry |= GY521_SLEEP; // Enable sleep
 	else if(!aktiv) reg_entry &= ~GY521_SLEEP; // Disable sleep
-	else return true;
 
 	// Write back to register
 	gy521_cache[0] = GY521_REG_PWR_MGMT_1;
@@ -195,14 +201,12 @@ bool gy521_sleep(bool aktiv){
 // === & Calculate Scaling Factors ===
 // ===================================
 bool gy521_set_fsr(gy521_s *gy521){
-
-
 	// Read FSR Register
 	uint8_t reg[2];
 	if(!gy521_read_register(GY521_REG_GYRO_CONFIG, reg, 2)) return false;
 
 	// Gyro FSR bits
-	reg[0] &= ~(0x18); // Delete bits 4:3
+	reg[0] &= ~0x18; // Delete bits 4:3
 	reg[0] |= gy521->conf.gyro.fsr; // Set FSR Bits
 
 	// Automatic scaling calculation:
@@ -210,7 +214,7 @@ bool gy521_set_fsr(gy521_s *gy521){
 	gy521->conf.gyro.fsr_divider = 131.0f / (1 << ((gy521->conf.gyro.fsr >> 3) & 0x03));
 
 	// Accel FSR bits
-	reg[1] &= ~(0x18);
+	reg[1] &= ~0x18;
 	reg[1] |= gy521->conf.accel.fsr;
 
 	// Automatic scaling calculation (raw / divider = G)
