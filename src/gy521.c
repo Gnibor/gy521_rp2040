@@ -1,3 +1,30 @@
+/*
+ * ================================================================
+ *  Project:      GY-521 (MPU-6050) Driver for RP2040
+ *  File:         gy521.c
+ *  Author:       (Gnibor) Robin Gerhartz
+ *  License:      MIT License
+ *  Repository:   https://github.com/Gnibor/gy521_rp2040
+ * ================================================================
+ *
+ *  Description:
+ *  Low-level driver implementation for the GY-521 module
+ *  based on the MPU-6050 6-axis IMU sensor.
+ *
+ *  This file implements:
+ *  - I²C communication
+ *  - Register-level configuration
+ *  - Sensor data acquisition
+ *  - Automatic scaling (raw -> physical units)
+ *  - Gyroscope zero-point calibration
+ *  - Power management features
+ *
+ *  The driver is written in a lightweight embedded style
+ *  and uses function pointers inside a device structure
+ *  to emulate object-oriented behavior in C.
+ *
+ * ================================================================
+ */
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 #include <stdint.h>

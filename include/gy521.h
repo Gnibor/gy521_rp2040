@@ -1,3 +1,42 @@
+/*
+ * ================================================================
+ *  Project:      GY-521 (MPU-6050) Driver for RP2040
+ *  File:         gy521.h
+ *  Author:       (Gnibor) Robin Gerhartz
+ *  License:      MIT License
+ *  Repository:   https://github.com/Gnibor/gy521_rp2040
+ * ================================================================
+ *
+ *  MIT License
+ *
+ *  Copyright (c) 2026 (Gnibor) Robin Gerhartz
+ *
+ *  Permission is hereby granted, free of charge, to any person
+ *  obtaining a copy of this software and associated documentation
+ *  files (the "Software"), to deal in the Software without restriction,
+ *  including without limitation the rights to use, copy, modify,
+ *  merge, publish, distribute, sublicense, and/or sell copies of
+ *  the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be
+ *  included in all copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ *  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ *  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ *  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ *  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ *  DEALINGS IN THE SOFTWARE.
+ *
+ * ================================================================
+ *
+ *  Public API for the GY-521 (MPU-6050) driver.
+ *
+ * ================================================================
+ */
 #pragma once
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
@@ -28,7 +67,7 @@
 #endif
 
 #ifndef GY521_I2C_ADDR
-#define GY521_I2C_ADDR 0x68 // Default I2C address for GY-521(MPU-6050)
+#define GY521_I2C_ADDR 0x68 // Default I2C address for GY-521(MPU-6050) (AD0 pin -> Gnd)
 #endif
 
 /*
@@ -48,24 +87,28 @@
 // ========================================
 // === Full Scale Range (FSR) bit masks ===
 // ========================================
+// Accelerometer FSR values
 #define GY521_ACCEL_FSR_SEL_2G 0x00
 #define GY521_ACCEL_FSR_SEL_4G 0x08
 #define GY521_ACCEL_FSR_SEL_8G 0x10
 #define GY521_ACCEL_FSR_SEL_16G 0x18
 
+// Gyroscope FSR values
 #define GY521_GYRO_FSR_SEL_250DPS 0x00
 #define GY521_GYRO_FSR_SEL_500DPS 0x08
 #define GY521_GYRO_FSR_SEL_1000DPS 0x10
 #define GY521_GYRO_FSR_SEL_2000DPS 0x18
 
-
-#define GY521_CLKSEL_8MHZ 0x00
-#define GY521_CLKSEL_GYRO_X 0x01
-#define GY521_CLKSEL_GYRO_Y 0x02
-#define GY521_CLKSEL_GYRO_Z 0x03
-#define GY521_CLKSEL_EXT_32_768KHZ 0x04
-#define GY521_CLKSEL_EXT_19_2MHZ 0x05
-#define GY521_CLKSEL_STOP 0x07
+// ==========================
+// === Clock Source Select ===
+// ==========================
+#define GY521_CLKSEL_8MHZ 0x00 // Internal 8 MHz oscillator
+#define GY521_CLKSEL_GYRO_X 0x01 // PLL with X-axis gyroscope reference
+#define GY521_CLKSEL_GYRO_Y 0x02 // PLL with Y-axis gyroscope reference
+#define GY521_CLKSEL_GYRO_Z 0x03 // PLL with Z-axis gyroscope reference
+#define GY521_CLKSEL_EXT_32_768KHZ 0x04 // External 32.768 kHz reference
+#define GY521_CLKSEL_EXT_19_2MHZ 0x05 // External 19.2 MHz reference
+#define GY521_CLKSEL_STOP 0x07 // Stops clock and keeps timing generator in reset
 
 #define GY521_LP_WAKE_CTRL_1_25HZ 0
 #define GY521_LP_WAKE_CTRL_5HZ (0x01 << 6)
