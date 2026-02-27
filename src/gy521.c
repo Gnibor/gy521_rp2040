@@ -48,6 +48,7 @@ bool gy521_test_connection(void);
 bool gy521_read_reg(uint8_t reg, uint8_t *out, uint8_t how_many);
 bool gy521_sleep(bool aktiv); // true = enable, false = disable
 bool gy521_set_fsr(gy521_s *gy521); // automatically calculate scaling factors
+bool gy521_set_clksel(gy521_s *gy521);
 bool gy521_calibrate_gyro(uint8_t sample); // calibrate gyro offsets
 bool gy521_read(gy521_s *out, uint8_t accel_temp_gyro, bool scaled); // 0=all, scaled=true -> G/°C/°/s
 
@@ -84,11 +85,13 @@ gy521_s gy521_init(void) {
 	gy521_s gy521 = {0};
 	gy521.conf.accel.fsr_divider = 131.0f;
 	gy521.conf.gyro.fsr_divider = 16384;
+	gy521.conf.gyro.x.clksel = true;
 	gy521.fn.sleep = &gy521_sleep;
 	gy521.fn.test_connection = &gy521_test_connection;
 	gy521.fn.read = &gy521_read;
 	gy521.fn.gyro.calibrate = &gy521_calibrate_gyro;
 	gy521.fn.set_fsr = &gy521_set_fsr;
+	gy521.fn.clksel = &gy521_set_clksel;
 	return gy521;
 }
 
@@ -112,6 +115,23 @@ bool gy521_test_connection(void) {
 	uint8_t who_am_i;
 	if(!gy521_read_register(GY521_REG_WHO_AM_I, &who_am_i, 1)) return false;
 	return who_am_i == 0x68 ? true : false;
+}
+
+bool gy521_set_clksel(gy521_s *gy521){
+	if(gy521->conf.clksel == 0){
+		if(gy521->conf.gyro.x.clksel) gy521->conf.clksel = GY521_CLKSEL_GYRO_X;
+		else if(gy521->conf.gyro.y.clksel) gy521->conf.clksel = GY521_CLKSEL_GYRO_Y;
+		else if (gy521->conf.gyro.z.clksel) gy521->conf.clksel = GY521_CLKSEL_GYRO_Z;
+	}
+
+	if(!gy521_read_register(GY521_REG_PWR_MGMT_1, gy521_cache, 1)) return false;
+	gy521_cache[0] &= ~0x07;
+	gy521_cache[0] |= gy521->conf.clksel;
+
+	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){ GY521_REG_PWR_MGMT_1, gy521_cache[0]}, 2, false);
+	if(ret < 0) return false;
+
+	return true;
 }
 
 // ==================

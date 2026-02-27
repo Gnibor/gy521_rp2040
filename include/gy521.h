@@ -80,7 +80,7 @@
  * Raw axis values directly from registers
  * Signed 16-bit values from sensor
  */
-typedef struct {
+typedef struct{
 	int16_t x,y,z;
 } gy521_axis_raw_t;
 
@@ -89,7 +89,7 @@ typedef struct {
  * - Accel: g-force
  * - Gyro: degrees per second
  */
-typedef struct {
+typedef struct{
 	float x,y,z;
 } gy521_axis_scaled_t;
 
@@ -162,6 +162,7 @@ typedef struct gy521_s{
 		bool (*sleep)(bool);
 		bool (*read)(struct gy521_s (*), uint8_t, bool);
 		bool (*set_fsr)(struct gy521_s (*));
+		bool (*clksel)(struct gy521_s (*));
 
 		struct{
 			bool (*sleep)(uint8_t);
