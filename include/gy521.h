@@ -20,7 +20,7 @@
 #endif
 
 #ifndef GY521_USE_PULLUP
-#define GY521_USE_PULLUP 0 // 1 = enable internal pull-up, 0 = disabled
+#define GY521_USE_PULLUP 1 // 1 = enable internal pull-up, 0 = disabled
 #endif
 
 #ifndef GY521_INT_PIN
@@ -159,6 +159,7 @@ typedef struct gy521_s{
 	// =========================
 	struct{
 		bool (*test_connection)(void);
+		bool (*reset)(void);
 		bool (*sleep)(bool);
 		bool (*read)(struct gy521_s (*), uint8_t, bool);
 		bool (*set_fsr)(struct gy521_s (*));

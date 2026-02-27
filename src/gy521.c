@@ -47,6 +47,7 @@
 // Function prototypes
 bool gy521_test_connection(void);
 bool gy521_read_reg(uint8_t reg, uint8_t *out, uint8_t how_many);
+bool gy521_reset(void);
 bool gy521_sleep(bool aktiv); // true = enable, false = disable
 bool gy521_set_fsr(gy521_s *gy521); // automatically calculate scaling factors
 bool gy521_set_clksel(gy521_s *gy521);
@@ -88,6 +89,7 @@ gy521_s gy521_init(void){
 	gy521.conf.accel.fsr_divider = 131.0f;
 	gy521.conf.gyro.fsr_divider = 16384.0f;
 	gy521.conf.gyro.x.clksel = true;
+	gy521.fn.reset = &gy521_reset;
 	gy521.fn.sleep = &gy521_sleep;
 	gy521.fn.test_connection = &gy521_test_connection;
 	gy521.fn.read = &gy521_read;
@@ -120,6 +122,16 @@ bool gy521_test_connection(void){
 	return who_am_i == 0x68 ? true : false;
 }
 
+bool gy521_reset(void){
+	if(!gy521_read_register(GY521_REG_PWR_MGMT_1, gy521_cache, 1)) return false;
+	gy521_cache[0] |= GY521_DEVICE_RESET;
+
+	uint8_t ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){GY521_REG_PWR_MGMT_1, gy521_cache[0]}, 1, false);
+	if(ret < 0) return false;
+
+	return true;
+}
+
 bool gy521_set_stby(gy521_s *gy521){
 	if(!gy521_read_register(GY521_REG_PWR_MGMT_2, gy521_cache, 1)) return false;
 
@@ -146,6 +158,7 @@ bool gy521_set_clksel(gy521_s *gy521){
 
 	if(!gy521_read_register(GY521_REG_PWR_MGMT_1, gy521_cache, 1)) return false;
 	gy521_cache[0] &= ~0x07;
+	gy521_cache[0] &= ~0x40; // clear sleep
 	gy521_cache[0] |= gy521->conf.clksel;
 
 	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){ GY521_REG_PWR_MGMT_1, gy521_cache[0]}, 2, false);

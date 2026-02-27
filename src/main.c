@@ -21,6 +21,10 @@ int main(void){
 	if(!connected) printf("GY-521 not found!\n");
 	else printf("GY-521 ready!\n");
 
+	if(gy521.fn.reset()) printf("GY-521 got reset\n");
+
+	gy521.fn.sleep(false);
+
 	gy521.conf.accel.fsr = GY521_ACCEL_FSR_SEL_8G;
 	gy521.conf.gyro.fsr = GY521_GYRO_FSR_SEL_2000DPS;
 	if(gy521.fn.set_fsr(&gy521)) printf("GY-521 Full-Scale-Range is set.\n");
@@ -28,8 +32,6 @@ int main(void){
 	gy521.conf.gyro.x.clksel = true;
 	if(gy521.fn.clksel(&gy521)) printf("GY-521 Clock Select set to GyroX\n");
 
-	gy521.conf.gyro.y.stby = true;
-	gy521.conf.gyro.z.stby = true;
 	gy521.conf.accel.z.stby = true;
 	if(gy521.fn.set_stby(&gy521)) printf("YG,ZG,ZA in standby\n");
 
