@@ -158,14 +158,15 @@ Default I²C address: `0x68`
 
 ## Configuration
 
-Hardware configuration can be adjusted in `gy521.h`:
+Hardware configuration can be adjusted in `gy521.h`
+or in `main.c` befor the `#include 'gy521.h'`:
 
 ```c
 #define GY521_I2C_PORT i2c1
 #define GY521_SDA_PIN 6
 #define GY521_SCL_PIN 7
 #define GY521_I2C_ADDR 0x68
-#define GY521_USE_PULLUP 1
+#define GY521_USE_PULLUP 0
 ```
 
 ---
@@ -190,6 +191,8 @@ int main(void)
     }
 
     imu.fn.sleep(false);
+    imu.conf.accel.fsr = GY521_ACCEL_FSR_SEL_4G;
+    imu.conf.gyro.fsr = GY521_GYRO_FSR_SEL_1000DPS;
     imu.fn.set_fsr(&imu);
 
     imu.fn.gyro.calibrate(20);
