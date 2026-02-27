@@ -143,6 +143,7 @@ bool gy521_sleep(bool aktiv){
 // ===================================
 bool gy521_set_fsr(gy521_s *gy521){
 
+
 	// Read FSR Register
 	uint8_t reg[2];
 	if(!gy521_read_register(GY521_REG_GYRO_CONFIG, reg, 2)) return false;
