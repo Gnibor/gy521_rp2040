@@ -1,45 +1,41 @@
-// include pico headers
 #include "pico/stdlib.h"
 #include <stdio.h>
-#include "gy521.h"
+#include <sys/types.h>
+
 #include "default.h"
-
-gy521_scaled_t gy521;
-
-
+#include "gy521.h"
 
 int main(void){
 	stdio_init_board();
-	printf("test\n");
-	gy521_init();
-
+	gy521_s gy521 = gy521_init();
 	int retries = 3;
 	bool connected = false;
-
-	while (retries--){
-		connected = gy521_test_connection();
+	while(retries--){
+		printf("Try connecting GY-521...\n");
+		connected = gy521.fn.test_connection();
 		if(connected) break;
 
 		printf("Retrying...\n");
 		sleep_ms(750);
 	}
+	if(!connected) printf("GY-521 not found!\n");
+	else printf("GY-521 ready!\n");
 
-	if(!connected){
-		printf("GY-521 nicht gefunden!\n");
-	}
+	gy521.conf.accel.fsr = GY521_ACCEL_FSR_SEL_8G;
+	gy521.conf.gyro.fsr = GY521_GYRO_FSR_SEL_2000DPS;
+	if(gy521.fn.set_fsr(&gy521)) printf("GY-521 Full-Scale-Range is set.\n");
 
-	printf("GY-521 bereit!\n");
-
-	bool ret = gy521_set_fs(GY521_ACCEL_FS, GY521_ACCEL_FS_SEL_4G);
-	while(!ret) tight_loop_contents();
-	ret = gy521_set_fs(GY521_GYRO_FS, GY521_GYRO_FS_SEL_1000DPS);
-	while(!ret) tight_loop_contents();
+	printf("Try to calibrate GY-521\n");
+	sleep_ms(2000);
+	if(gy521.fn.gyro.calibrate(15)) printf("GY-521 is now calibrated.\n");
+	else printf("GY-521 could not be calibrated.\n");
 
 	while(1){
-		if(gy521_read_scaled(&gy521))
-			printf("G=X:%6.3f Y:%6.3f Z:%6.3f | °C=%6.2f | °/s=X:%8.3f Y:%8.3f Z:%8.3f\n", 
-				gy521.ax, gy521.ay, gy521.az, gy521.temp, gy521.gx, gy521.gy, gy521.gz);
-		sleep_ms(250);
+		if(gy521.fn.read(&gy521, 0, true))
+			printf("G=X:%6.3f Y:%6.3f Z:%6.3f | °C=%6.2f | °/s=X:%9.3f Y:%9.3f Z:%9.3f\n", 
+				gy521.v.accel.g.x, gy521.v.accel.g.y, gy521.v.accel.g.z, 
+				gy521.v.temp.celsius, 
+				gy521.v.gyro.dps.x, gy521.v.gyro.dps.y, gy521.v.gyro.dps.z);
+		sleep_ms(500);
 	}
-	return 0;
 }

@@ -1,11 +1,13 @@
+datasheet/
+
 # Build directory
 build/
 
 # CMake
 CMakeFiles/
-datasheet/
 CMakeCache.txt
 cmake_install.cmake
+pico_sdk_import.cmake
 
 # Pico build outputs
 *.elf
