@@ -27,6 +27,7 @@
  */
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
+#include <stdbool.h>
 #include <stdint.h>
 #include "gy521.h"
 
@@ -76,7 +77,7 @@
 bool gy521_test_connection(void);
 bool gy521_read_reg(uint8_t reg, uint8_t *out, uint8_t how_many);
 bool gy521_reset(void);
-bool gy521_sleep(bool aktiv); // true = enable, false = disable
+bool gy521_sleep(gy521_s *gy521); // true = enable, false = disable
 bool gy521_set_fsr(gy521_s *gy521); // automatically calculate scaling factors
 bool gy521_set_clksel(gy521_s *gy521);
 bool gy521_set_stby(gy521_s *gy521);
@@ -133,10 +134,10 @@ gy521_s gy521_init(void){
 // =========================
 bool gy521_read_register(uint8_t reg, uint8_t *out, uint8_t how_many){
 	uint8_t ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){reg}, 1, true);
-	if(ret < 0) return false;
+	if(ret != 1) return false;
 
 	ret = i2c_read_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, out, how_many, false);
-	if(ret < 0) return false;
+	if(ret != how_many) return false;
 
 	return true;
 }
@@ -158,7 +159,7 @@ bool gy521_reset(void){
 	gy521_cache[0] |= GY521_DEVICE_RESET;
 
 	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){GY521_REG_PWR_MGMT_1, gy521_cache[0]}, 1, false);
-	if(ret < 0) return false;
+	if(ret != 1) return false;
 
 	return true;
 }
@@ -169,6 +170,7 @@ bool gy521_reset(void){
 bool gy521_set_stby(gy521_s *gy521){
 	if(!gy521_read_register(GY521_REG_PWR_MGMT_2, gy521_cache, 1)) return false;
 
+	gy521_cache[0] &= ~0x3f;
 	if(gy521->conf.gyro.x.stby) gy521_cache[0] |= GY521_STBY_XG;
 	if(gy521->conf.gyro.y.stby) gy521_cache[0] |= GY521_STBY_YG;
 	if(gy521->conf.gyro.z.stby) gy521_cache[0] |= GY521_STBY_ZG;
@@ -178,7 +180,7 @@ bool gy521_set_stby(gy521_s *gy521){
 	if(gy521->conf.accel.z.stby) gy521_cache[0] |= GY521_STBY_ZA;
 
 	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){ GY521_REG_PWR_MGMT_2, gy521_cache[0]}, 2, false);
-	if(ret < 0) return false;
+	if(ret != 2) return false;
 
 	return true;
 }
@@ -196,7 +198,7 @@ bool gy521_set_clksel(gy521_s *gy521){
 	gy521_cache[0] |= gy521->conf.clksel;
 
 	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){ GY521_REG_PWR_MGMT_1, gy521_cache[0]}, 2, false);
-	if(ret < 0) return false;
+	if(ret != 2) return false;
 
 	return true;
 }
@@ -204,21 +206,28 @@ bool gy521_set_clksel(gy521_s *gy521){
 // ==================
 // === Sleep Mode ===
 // ==================
-bool gy521_sleep(bool aktiv){
-	uint8_t reg_entry = 0x00;
-	
-	if(!gy521_read_register(GY521_REG_PWR_MGMT_1, &reg_entry, 1)) return false;
+bool gy521_sleep(gy521_s *gy521){
+	if(!gy521_read_register(GY521_REG_PWR_MGMT_1, gy521_cache, 1)) return false;
 
-	bool is_set = reg_entry & GY521_SLEEP;
+	uint8_t reg = gy521_cache[0];
 
-	if(aktiv && !is_set) reg_entry |= GY521_SLEEP; // Enable sleep
-	else if(!aktiv) reg_entry &= ~GY521_SLEEP; // Disable sleep
+	// Sleep Bit
+	if(gy521->conf.sleep)
+		reg |= GY521_SLEEP;
+	else
+		reg &= ~GY521_SLEEP;
 
-	// Write back to register
+	// Temperature disable Bit
+	if(gy521->conf.temp.sleep)
+		reg |= GY521_TEMP_DIS;
+	else
+		reg &= ~GY521_TEMP_DIS;
+
 	gy521_cache[0] = GY521_REG_PWR_MGMT_1;
-	gy521_cache[1] = reg_entry;
+	gy521_cache[1] = reg;
+
 	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, gy521_cache, 2, false);
-	if(ret < 0) return false;
+	if(ret != 2) return false;
 
 	return true;
 }
@@ -249,7 +258,7 @@ bool gy521_set_fsr(gy521_s *gy521){
 
 	// Write back to registers
 	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){GY521_REG_GYRO_CONFIG, reg[0], reg[1]}, 3, false);
-	if(ret < 0) return false;
+	if(ret != 3) return false;
 
 	return true;
 }

@@ -183,7 +183,7 @@ typedef struct gy521_s{
 		} accel;
 
 		struct{
-			bool disable; // Disable temperature sensor
+			bool sleep; // Disable temperature sensor
 		} temp;
 
 		struct{
@@ -203,23 +203,23 @@ typedef struct gy521_s{
 	struct{
 		bool (*test_connection)(void);
 		bool (*reset)(void);
-		bool (*sleep)(bool);
+		bool (*sleep)(struct gy521_s (*));
 		bool (*read)(struct gy521_s (*), uint8_t, bool);
 		bool (*set_fsr)(struct gy521_s (*));
 		bool (*set_stby)(struct gy521_s (*));
 		bool (*clksel)(struct gy521_s (*));
 
 		struct{
-			bool (*sleep)(uint8_t);
+			//bool (*sleep)(void);
 		} accel;
 
 		struct{
-			bool (*sleep)(uint8_t);
+			//bool (*sleep)(void);
 		} temp;
 
 		struct{
 			bool (*calibrate)(uint8_t);
-			bool (*sleep)(uint8_t);
+			//bool (*sleep)(void);
 		} gyro;
 	} fn;
 } gy521_s;
