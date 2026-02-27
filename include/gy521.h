@@ -134,17 +134,9 @@ typedef struct gy521_s{
 			uint8_t fsr; // Full scale range setting
 			float fsr_divider;
 
-			struct{
-				bool stby;
-			} x;
-
-			struct{
-				bool stby;
-			} y;
-
-			struct{
-				bool stby;
-			} z;
+			struct{ bool stby; } x;
+			struct{ bool stby; } y;
+			struct{ bool stby; } z;
 		} accel;
 
 		struct{
@@ -156,20 +148,9 @@ typedef struct gy521_s{
 			float fsr_divider;
 			uint8_t calibrate_samples;
 
-			struct{
-				bool clksel;
-				bool stby;
-			} x;
-
-			struct{
-				bool clksel;
-				bool stby;
-			} y;
-
-			struct{
-				bool clksel;
-				bool stby;
-			} z;
+			struct{ bool clksel, stby; } x;
+			struct{ bool clksel, stby; } y;
+			struct{ bool clksel, stby; } z;
 		} gyro;
 	} conf;
 
