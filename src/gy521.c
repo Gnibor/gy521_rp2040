@@ -158,8 +158,8 @@ bool gy521_reset(void){
 	if(!gy521_read_register(GY521_REG_PWR_MGMT_1, gy521_cache, 1)) return false;
 	gy521_cache[0] |= GY521_DEVICE_RESET;
 
-	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){GY521_REG_PWR_MGMT_1, gy521_cache[0]}, 1, false);
-	if(ret != 1) return false;
+	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){GY521_REG_PWR_MGMT_1, gy521_cache[0]}, 2, false);
+	if(ret != 2) return false;
 
 	return true;
 }
