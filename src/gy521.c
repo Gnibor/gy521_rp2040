@@ -82,7 +82,7 @@ bool gy521_set_fsr(gy521_s *gy521); // automatically calculate scaling factors
 bool gy521_set_clksel(gy521_s *gy521);
 bool gy521_set_stby(gy521_s *gy521);
 bool gy521_calibrate_gyro(uint8_t sample); // calibrate gyro offsets
-bool gy521_read(gy521_s *out, uint8_t accel_temp_gyro, bool scaled); // 0=all, scaled=true -> G/°C/°/s
+bool gy521_read(gy521_s *gy521, uint8_t accel_temp_gyro, bool scaled); // 0=all, scaled=true -> G/°C/°/s
 
 typedef struct{
 	int32_t x, y, z;
