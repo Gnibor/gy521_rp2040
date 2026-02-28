@@ -73,11 +73,11 @@ It will not compile without the pico-sdk.
 
 ---
 
-## Development Roadmap
+## Development plan
 
 The following features are planned and will be implemented eventuell. (Not in order)
 
-### 1. Interrupt Configuration & Handling
+### Interrupt Configuration & Handling
 
 Planned additions:
 
@@ -93,7 +93,7 @@ Allow event-driven sensor reading with minimal CPU overhead.
 
 ---
 
-### 2. FIFO Support
+### FIFO Support
 
 Planned additions:
 
@@ -108,7 +108,7 @@ Enable higher sample rates and buffered data acquisition.
 
 ---
 
-### 3. I2C Slave (I2C_SLVx) Configuration
+### I2C Slave (I2C_SLVx) Configuration
 
 Planned additions:
 
@@ -123,7 +123,7 @@ Support advanced MPU-6050 internal I2C master features.
 
 ---
 
-### 4. Extended Power Management
+### Extended Power Management
 
 Planned additions:
 
@@ -134,7 +134,7 @@ Planned additions:
 
 ---
 
-### 5. Complete Register Coverage
+### Complete Register Coverage
 
 Long-term goal:
 
@@ -227,12 +227,13 @@ Initializes I²C and returns a fully configured device struct.
 
 | Function | Description |
 |----------|------------|
+| `init()` | Initilize I²C connection and returns a device struct |
 | `test_connection()` | Verifies device via WHO_AM_I register |
 | `reset()` | Performs device reset |
-| `sleep(bool)` | Enables/disables sleep mode |
+| `sleep()` | Enables/disables sleep mode |
 | `set_fsr()` | Sets full-scale range and updates scaling |
 | `set_stby()` | Enables standby per axis |
-| `clksel()` | Selects clock source |
+| `set_clksel()` | Selects clock source |
 | `read()` | Reads sensor data (raw or scaled) |
 | `gyro.calibrate(samples)` | Computes gyro zero-offset |
 
@@ -308,4 +309,4 @@ https://github.com/Gnibor/gy521_rp2040
 Early but functional implementation.  
 Actively developed toward full MPU-6050 feature support.
 
-Contributions, suggestions and improvements are welcome.
+Contributions (especially with I²C_SLV and FIFO), suggestions and improvements are welcome.
