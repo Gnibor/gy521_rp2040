@@ -73,7 +73,7 @@ It will not compile without the pico-sdk.
 
 ---
 
-## Development plan
+## Development Plan
 
 The following features are planned and will be implemented eventuell. (Not in order)
 
