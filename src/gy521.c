@@ -120,7 +120,7 @@ gy521_s gy521_init(void){
 	gy521.fn.test_connection = &gy521_test_connection;
 	gy521.fn.read = &gy521_read;
 	gy521.fn.gyro.calibrate = &gy521_calibrate_gyro;
-	gy521.fn.set_fsr = &gy521_set_fsr;
+	gy521.fn.fsr = &gy521_set_fsr;
 	gy521.fn.stby = &gy521_set_stby;
 	gy521.fn.clksel = &gy521_set_clksel;
 	g_gy521 = &gy521;

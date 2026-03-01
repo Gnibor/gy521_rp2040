@@ -53,21 +53,20 @@ int main(void){
 	if(gy521.fn.reset()) printf("GY-521 got reset\n");
 
 	gy521.conf.sleep = false;
-	if(gy521.fn.sleep()) printf("GY-521 sleep stop\n");
-
+	gy521.conf.scaled = true;
 	gy521.conf.accel.fsr = GY521_ACCEL_FSR_SEL_8G;
 	gy521.conf.gyro.fsr = GY521_GYRO_FSR_SEL_2000DPS;
-	if(gy521.fn.set_fsr()) printf("GY-521 Full-Scale-Range is set.\n");
-
 	gy521.conf.gyro.x.clksel = true;
+
+	if(gy521.fn.sleep()) printf("GY-521 sleep stop\n");
+	if(gy521.fn.fsr()) printf("GY-521 Full-Scale-Range is set.\n");
 	if(gy521.fn.clksel()) printf("GY-521 Clock Select set to GyroX\n");
 
-	gy521.conf.gyro.y.stby = true;
-	if(gy521.fn.stby()) printf("YG in standby\n");
-	gy521.conf.temp.sleep = true;
-	if(gy521.fn.sleep()) printf("temp in standby\n");
+	//gy521.conf.gyro.y.stby = true;
+	//if(gy521.fn.stby()) printf("YG in standby\n");
+	//gy521.conf.temp.sleep = true;
+	//if(gy521.fn.sleep()) printf("temp in standby\n");
 
-	gy521.conf.scaled = true;
 
 	printf("Try to calibrate GY-521\n");
 	sleep_ms(2000);

@@ -214,7 +214,7 @@ typedef struct gy521_s{
 		bool (*reset)(void);
 		bool (*sleep)(void);
 		bool (*read)(uint8_t);
-		bool (*set_fsr)(void);
+		bool (*fsr)(void);
 		bool (*stby)(void);
 		bool (*clksel)(void);
 
