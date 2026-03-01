@@ -96,16 +96,15 @@
 #define GY521_ACCEL_FSR_SEL_4G 0x08
 #define GY521_ACCEL_FSR_SEL_8G 0x10
 #define GY521_ACCEL_FSR_SEL_16G 0x18
-
 // Gyroscope FSR values
 #define GY521_GYRO_FSR_SEL_250DPS 0x00
 #define GY521_GYRO_FSR_SEL_500DPS 0x08
 #define GY521_GYRO_FSR_SEL_1000DPS 0x10
 #define GY521_GYRO_FSR_SEL_2000DPS 0x18
 
-// ==========================
-// === Clock Source Select ===
-// ==========================
+// ==============================================
+// === Clock Source Select (CLKSEL) bit masks ===
+// ==============================================
 #define GY521_CLKSEL_8MHZ 0x00 // Internal 8 MHz oscillator
 #define GY521_CLKSEL_GYRO_X 0x01 // PLL with X-axis gyroscope reference
 #define GY521_CLKSEL_GYRO_Y 0x02 // PLL with Y-axis gyroscope reference
@@ -114,6 +113,9 @@
 #define GY521_CLKSEL_EXT_19_2MHZ 0x05 // External 19.2 MHz reference
 #define GY521_CLKSEL_STOP 0x07 // Stops clock and keeps timing generator in reset
 
+// ========================================
+// === Low Power Wake Control bit masks ===
+// ========================================
 #define GY521_LP_WAKE_CTRL_1_25HZ 0
 #define GY521_LP_WAKE_CTRL_5HZ (0x01 << 6)
 #define GY521_LP_WAKE_CTRL_20HZ (0x02 << 6)
