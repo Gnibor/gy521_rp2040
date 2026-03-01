@@ -1,172 +1,100 @@
 # GY-521 (MPU-6050) Driver for RP2040
 
-Lightweight C driver for the **GY-521 (MPU-6050)** 6-axis IMU  
-designed for the **Raspberry Pi RP2040** (Raspberry Pi Pico).
-
-This project provides a clean, register-level implementation with
-automatic scaling and a structured device API using function pointers
-(object-oriented style in C).
+Lightweight C driver for the **GY-521 (MPU-6050)** 6-axis IMU designed for the **Raspberry Pi RP2040** (Raspberry Pi Pico). Provides clean register-level implementation with automatic scaling and structured device API using function pointers (object-oriented style in C).
 
 ---
 
 ## Project Note
+This is my first project in almost a decade. Focus is on:
 
-This is my first project in almost a decade. Please be kind.
-It is still a work in progress and actively being extended and refined.
-
-The focus is on:
-
-- Clean low-level implementation
-- Transparent register control
-- Minimal abstraction
-- Explicit configuration
-- Expandability toward full MPU-6050 feature coverage
+- Clean low-level implementation  
+- Transparent register control  
+- Minimal abstraction  
+- Explicit configuration  
+- Expandability toward full MPU-6050 feature coverage  
 
 ---
 
 ## Requirements
+- Raspberry Pi pico-sdk  
+- RP2040 toolchain  
+- CMake-based build environment  
 
-This project requires the **Raspberry Pi pico-sdk**.
-
-You must have:
-
-- RP2040 toolchain
-- pico-sdk installed and configured
-- CMake-based build environment
-
-Official SDK repository:
-https://github.com/raspberrypi/pico-sdk
-
-This driver depends on:
-
-- `pico/stdlib`
-- `hardware/i2c`
-
-It will not compile without the pico-sdk.
+Dependencies: pico/stdlib, hardware/i2c  
 
 ---
 
 ## Badges
-
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Platform: RP2040](https://img.shields.io/badge/Platform-RP2040-blue)
-![Language: C](https://img.shields.io/badge/Language-C-informational)
-![Interface: I2C](https://img.shields.io/badge/Interface-I2C-orange)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)  
+![Platform: RP2040](https://img.shields.io/badge/Platform-RP2040-blue)  
+![Language: C](https://img.shields.io/badge/Language-C-informational)  
+![Interface: I2C](https://img.shields.io/badge/Interface-I2C-orange)  
 
 ---
 
 ## Features (Current Implementation)
-
-- I²C communication (400 kHz default)
-- WHO_AM_I device verification
-- Device reset and wake-up control
-- Clock source selection
-- Accelerometer & Gyroscope Full-Scale-Range configuration
-- Standby control per axis
-- Gyroscope zero-offset calibration
-- Raw + scaled sensor output:
-  - Acceleration in **g**
-  - Angular velocity in **°/s**
-  - Temperature in **°C**
-- No dynamic memory allocation
-- Fully configurable via macros
+- I²C communication (400 kHz)  
+- WHO_AM_I device verification  
+- Device reset and wake-up  
+- Clock source selection  
+- Accelerometer & Gyroscope Full-Scale-Range configuration  
+- Standby control per axis  
+- Gyroscope zero-offset calibration  
+- Raw + scaled sensor output: Acceleration in **g**, Angular velocity in **°/s**, Temperature in **°C**  
+- No dynamic memory allocation  
+- Fully configurable via macros  
 
 ---
 
 ## Development Plan
 
-The following features are planned and will be implemented eventuell. (Not in order)
-
 ### Interrupt Configuration & Handling
-
-Planned additions:
-
-- INT_ENABLE register configuration
-- INT_STATUS decoding
-- Data-ready interrupt support
-- Optional motion detection interrupt
-- External interrupt pin integration (GPIO IRQ handler)
-- Interrupt-driven sampling instead of polling
-
-Goal:
-Allow event-driven sensor reading with minimal CPU overhead.
-
----
+- INT_ENABLE register configuration  
+- INT_STATUS decoding  
+- Data-ready and motion detection interrupt support  
+- External GPIO interrupt integration  
+- Interrupt-driven sampling  
 
 ### FIFO Support
-
-Planned additions:
-
-- FIFO_EN configuration
-- FIFO_COUNT register handling
-- Burst read from FIFO
-- Overflow detection
-- Optional continuous buffered sampling mode
-
-Goal:
-Enable higher sample rates and buffered data acquisition.
-
----
+- FIFO_EN configuration  
+- FIFO_COUNT handling  
+- Burst read from FIFO  
+- Continuous buffered sampling mode  
 
 ### I2C Slave (I2C_SLVx) Configuration
-
-Planned additions:
-
-- External sensor passthrough configuration
-- I2C_SLV0–I2C_SLV4 setup
-- Master mode configuration
-- Automatic data injection into FIFO
-- Secondary sensor integration support
-
-Goal:
-Support advanced MPU-6050 internal I2C master features.
-
----
+- External sensor passthrough  
+- I2C_SLV0–I2C_SLV4 setup  
+- Master mode configuration  
 
 ### Extended Power Management
-
-Planned additions:
-
-- Cycle mode support
-- Low-power wake control configuration
-- Temperature sensor disable option
-- Fine-grained standby control API
-
----
+- Cycle mode support  
+- Low-power wake control  
+- Temperature sensor disable  
+- Fine-grained standby control API  
 
 ### Complete Register Coverage
-
-Long-term goal:
-
-- Structured access to all MPU-6050 registers
-- Improved configuration abstraction
-- Optional register debug dump function
+- Structured access to all MPU-6050 registers  
+- Optional register debug dump function  
 
 ---
 
 ## Hardware
-
-- Raspberry Pi Pico / RP2040
-- GY-521 (MPU-6050)
-- I²C wiring:
-  - SDA → configurable (default GPIO 6)
-  - SCL → configurable (default GPIO 7)
-
-Default I²C address: `0x68`
+- Raspberry Pi Pico / RP2040  
+- GY-521 (MPU-6050)  
+- I²C wiring (default): SDA → GPIO 6, SCL → GPIO 7  
+- Default I²C address: 0x68  
 
 ---
 
 ## Configuration
-
-Hardware configuration can be adjusted in `gy521.h`
-or in `main.c` befor the `#include 'gy521.h'`:
+Hardware config can be adjusted in `gy521.h` or in `main.c` before `#include "gy521.h"`:
 
 ```c
 #define GY521_I2C_PORT i2c1
 #define GY521_SDA_PIN 6
 #define GY521_SCL_PIN 7
-#define GY521_I2C_ADDR 0x68
 #define GY521_USE_PULLUP 0
+#include "gy521.h"
 ```
 
 ---
@@ -174,23 +102,21 @@ or in `main.c` befor the `#include 'gy521.h'`:
 ## Basic Usage
 
 ```c
-#include "gy521.h"
-
 int main(void)
 {
     stdio_usb_init();
-    while (!stdio_usb_connected()) {
-        sleep_ms(100);
-    }
+    while (!stdio_usb_connected()) sleep_ms(100);
 
-    gy521_s imu = gy521_init();
+    gy521_s imu = gy521_init(GY521_I2C_ADDR_GND);
 
     if (!imu.fn.test_connection()) {
         printf("Device not found!\n");
         return 1;
     }
 
-    imu.fn.sleep(false);
+    imu.conf.sleep = false;
+    imu.conf.temp.sleep = false;
+    imu.fn.sleep();
     imu.conf.accel.fsr = GY521_ACCEL_FSR_SEL_4G;
     imu.conf.gyro.fsr = GY521_GYRO_FSR_SEL_1000DPS;
     imu.fn.set_fsr(&imu);
@@ -216,10 +142,18 @@ int main(void)
 ### Initialization
 
 ```c
-gy521_s gy521_init(void);
+gy521_s gy521_init(uint8_t addr);
 ```
 
 Initializes I²C and returns a fully configured device struct.
+
+### Switch Device
+
+```c
+bool gy521_use(gy521_s device);
+```
+
+Sets a global pointer to 'device' all .fn. are now bounded to this 'device'.
 
 ---
 
@@ -227,15 +161,16 @@ Initializes I²C and returns a fully configured device struct.
 
 | Function | Description |
 |----------|------------|
-| `init()` | Initilize I²C connection and returns a device struct |
-| `test_connection()` | Verifies device via WHO_AM_I register |
-| `reset()` | Performs device reset |
-| `sleep()` | Enables/disables sleep mode |
-| `set_fsr()` | Sets full-scale range and updates scaling |
-| `set_stby()` | Enables standby per axis |
-| `set_clksel()` | Selects clock source |
-| `read()` | Reads sensor data (raw or scaled) |
-| `gyro.calibrate(samples)` | Computes gyro zero-offset |
+| `gy521_init(addr)` | Initilize I²C connection and returns a device struct |
+| `gy521_use(device)` | Set the global pointer for fn.* to 'device' |
+| `fn.test_connection()` | Verifies device via WHO_AM_I register |
+| `fn.reset()` | Performs device reset |
+| `fn.sleep()` | Enables/disables sleep mode |
+| `fn.fsr()` | Sets full-scale range and updates scaling |
+| `fn.stby()` | Enables/disables standby per axis |
+| `fn.clksel()` | Selects clock source |
+| `fn.read()` | Reads sensor data (raw or scaled) |
+| `fn.gyro.calibrate(samples)` | Computes gyro zero-offset |
 
 ---
 
