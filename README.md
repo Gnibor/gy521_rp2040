@@ -120,11 +120,7 @@ int main(void)
 
     imu.conf.accel.fsr = GY521_ACCEL_FSR_SEL_4G;
     imu.conf.gyro.fsr = GY521_GYRO_FSR_SEL_1000DPS;
-<<<<<<< HEAD
     imu.fn.fsr();
-=======
-    imu.fn.fsr(&imu);
->>>>>>> d3939bd (update clksel to clk_sel)
 
     imu.fn.gyro.calibrate(10);
 
@@ -174,13 +170,8 @@ Sets a global pointer to 'device' all .fn. are now bounded to this 'device'.
 | `fn.sleep()` | Enables/disables sleep mode |
 | `fn.fsr()` | Sets full-scale range and updates scaling |
 | `fn.stby()` | Enables/disables standby per axis |
-<<<<<<< HEAD
-| `fn.clksel()` | Selects clock source |
-| `fn.read(accel_temp_gyro)` | Reads sensor data (raw or scaled) |
-=======
 | `fn.clk_sel()` | Selects clock source |
-| `fn.read()` | Reads sensor data (raw or scaled) |
->>>>>>> d3939bd (update clksel to clk_sel)
+| `fn.read(accel_temp_gyro)` | Reads sensor data (raw or scaled) |
 | `fn.gyro.calibrate(samples)` | Computes gyro zero-offset |
 
 ---
