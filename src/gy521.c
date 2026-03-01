@@ -89,12 +89,29 @@ bool gy521_read(uint8_t accel_temp_gyro); // 0=all, scaled=true -> G/°C/°/s
 // ========================
 // Globaler Pointer auf das aktive GY521-Device
 static gy521_s *g_gy521 = NULL;
+
 static uint8_t g_gy521_cache[14]={0}; // temporary buffer for I2C reads
+static uint8_t g_gy521_ret_chache = 0;
+
+/*
+ * ERKLÄRUNG: gy521_use(&d1_gy521);
+ * g_gy521 = &d1_gy521;
+ * to set this device as used device
+ */
+bool gy521_use(gy521_s *device) {
+	// Prüfe ob Pointer gültig ist
+	if (device == NULL) {
+		return false;
+	}
+	g_gy521 = device;
+
+	return true;
+}
 
 // ========================
 // === Initialize GY521 ===
 // ========================
-gy521_s gy521_init(void){
+gy521_s gy521_init(uint8_t addr){
 	i2c_init(GY521_I2C_PORT, 400 * 1000); // 400 kHz I2C
 	gpio_set_function(GY521_SDA_PIN, GPIO_FUNC_I2C);
 	gpio_set_function(GY521_SCL_PIN, GPIO_FUNC_I2C);
@@ -112,9 +129,14 @@ gy521_s gy521_init(void){
 
 	// Initalize device struct and function pointers
 	gy521_s gy521 = {0};
+
+	if(!addr) gy521.conf.addr = GY521_I2C_ADDR_GND;
+	else gy521.conf.addr = addr;
+
 	gy521.conf.accel.fsr_divider = 131.0f;
 	gy521.conf.gyro.fsr_divider = 16384.0f;
 	gy521.conf.gyro.x.clksel = true;
+
 	gy521.fn.reset = &gy521_reset;
 	gy521.fn.sleep = &gy521_sleep;
 	gy521.fn.test_connection = &gy521_test_connection;
@@ -123,7 +145,9 @@ gy521_s gy521_init(void){
 	gy521.fn.fsr = &gy521_set_fsr;
 	gy521.fn.stby = &gy521_set_stby;
 	gy521.fn.clksel = &gy521_set_clksel;
+
 	g_gy521 = &gy521;
+
 	return gy521;
 }
 
@@ -131,11 +155,13 @@ gy521_s gy521_init(void){
 // === I2C Register Read ===
 // =========================
 bool gy521_read_register(uint8_t reg, uint8_t *out, uint8_t how_many){
-	uint8_t ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){reg}, 1, true);
-	if(ret != 1) return false;
+	if(!g_gy521) return false;
 
-	ret = i2c_read_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, out, how_many, false);
-	if(ret != how_many) return false;
+	uint8_t g_gy521_ret_cache = i2c_write_blocking(GY521_I2C_PORT, g_gy521->conf.addr, (uint8_t[]){reg}, 1, true);
+	if(g_gy521_ret_cache!= 1) return false;
+
+	g_gy521_ret_cache = i2c_read_blocking(GY521_I2C_PORT, g_gy521->conf.addr, out, how_many, false);
+	if(g_gy521_ret_cache!= how_many) return false;
 
 	return true;
 }
@@ -153,11 +179,13 @@ bool gy521_test_connection(void){
 // === Reset GY521 device ===
 // ==========================
 bool gy521_reset(void){
+	if(!g_gy521) return false;
+
 	if(!gy521_read_register(GY521_REG_PWR_MGMT_1, g_gy521_cache, 1)) return false;
 	g_gy521_cache[0] |= GY521_DEVICE_RESET;
 
-	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){GY521_REG_PWR_MGMT_1, g_gy521_cache[0]}, 2, false);
-	if(ret != 2) return false;
+	int g_gy521_ret_cache = i2c_write_blocking(GY521_I2C_PORT, g_gy521->conf.addr, (uint8_t[]){GY521_REG_PWR_MGMT_1, g_gy521_cache[0]}, 2, false);
+	if(g_gy521_ret_cache!= 2) return false;
 
 	return true;
 }
@@ -178,8 +206,8 @@ bool gy521_set_stby(void){
 	if(g_gy521->conf.accel.y.stby) g_gy521_cache[0] |= GY521_STBY_YA;
 	if(g_gy521->conf.accel.z.stby) g_gy521_cache[0] |= GY521_STBY_ZA;
 
-	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){ GY521_REG_PWR_MGMT_2, g_gy521_cache[0]}, 2, false);
-	if(ret != 2) return false;
+	int g_gy521_ret_cache = i2c_write_blocking(GY521_I2C_PORT, g_gy521->conf.addr, (uint8_t[]){ GY521_REG_PWR_MGMT_2, g_gy521_cache[0]}, 2, false);
+	if(g_gy521_ret_cache!= 2) return false;
 
 	return true;
 }
@@ -197,8 +225,8 @@ bool gy521_set_clksel(void){
 	g_gy521_cache[0] &= ~0x47; // clear sleep & CLK_SEL
 	g_gy521_cache[0] |= g_gy521->conf.clksel;
 
-	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){ GY521_REG_PWR_MGMT_1, g_gy521_cache[0]}, 2, false);
-	if(ret != 2) return false;
+	int g_gy521_ret_cache = i2c_write_blocking(GY521_I2C_PORT, g_gy521->conf.addr, (uint8_t[]){ GY521_REG_PWR_MGMT_1, g_gy521_cache[0]}, 2, false);
+	if(g_gy521_ret_cache!= 2) return false;
 
 	return true;
 }
@@ -227,8 +255,8 @@ bool gy521_sleep(void){
 	g_gy521_cache[0] = GY521_REG_PWR_MGMT_1;
 	g_gy521_cache[1] = reg;
 
-	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, g_gy521_cache, 2, false);
-	if(ret != 2) return false;
+	int g_gy521_ret_cache = i2c_write_blocking(GY521_I2C_PORT, g_gy521->conf.addr, g_gy521_cache, 2, false);
+	if(g_gy521_ret_cache!= 2) return false;
 
 	return true;
 }
@@ -259,8 +287,8 @@ bool gy521_set_fsr(void){
 	g_gy521->conf.accel.fsr_divider = 16384.0f / (1 << ((g_gy521->conf.accel.fsr >> 3) & 0x03));
 
 	// Write back to registers
-	int ret = i2c_write_blocking(GY521_I2C_PORT, GY521_I2C_ADDR, (uint8_t[]){GY521_REG_GYRO_CONFIG, reg[0], reg[1]}, 3, false);
-	if(ret != 3) return false;
+	int g_gy521_ret_cache = i2c_write_blocking(GY521_I2C_PORT, g_gy521->conf.addr, (uint8_t[]){GY521_REG_GYRO_CONFIG, reg[0], reg[1]}, 3, false);
+	if(g_gy521_ret_cache!= 3) return false;
 
 	return true;
 }
