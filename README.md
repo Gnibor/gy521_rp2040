@@ -117,14 +117,16 @@ int main(void)
     imu.conf.sleep = false;
     imu.conf.temp.sleep = false;
     imu.fn.sleep();
+
     imu.conf.accel.fsr = GY521_ACCEL_FSR_SEL_4G;
     imu.conf.gyro.fsr = GY521_GYRO_FSR_SEL_1000DPS;
-    imu.fn.set_fsr(&imu);
+    imu.fn.fsr();
 
-    imu.fn.gyro.calibrate(20);
+    imu.fn.gyro.calibrate(10);
 
+    imu.conf.scaled = true;
     while (1) {
-        if (imu.fn.read(&imu, GY521_ALL, true)) {
+        if (imu.fn.read(GY521_ALL)) {
             printf("Accel: %.2f %.2f %.2f g\n",
                    imu.v.accel.g.x,
                    imu.v.accel.g.y,
@@ -169,7 +171,7 @@ Sets a global pointer to 'device' all .fn. are now bounded to this 'device'.
 | `fn.fsr()` | Sets full-scale range and updates scaling |
 | `fn.stby()` | Enables/disables standby per axis |
 | `fn.clksel()` | Selects clock source |
-| `fn.read()` | Reads sensor data (raw or scaled) |
+| `fn.read(accel_temp_gyro)` | Reads sensor data (raw or scaled) |
 | `fn.gyro.calibrate(samples)` | Computes gyro zero-offset |
 
 ---
