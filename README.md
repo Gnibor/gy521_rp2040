@@ -38,7 +38,8 @@ Dependencies: pico/stdlib, hardware/i2c
 - Device reset and wake-up  
 - Clock source selection  
 - Accelerometer & Gyroscope Full-Scale-Range configuration  
-- Standby control per axis  
+- Standby control per axis
+- Sleep mode all or temperatur
 - Gyroscope zero-offset calibration  
 - Raw + scaled sensor output: Acceleration in **g**, Angular velocity in **°/s**, Temperature in **°C**  
 - No dynamic memory allocation  
@@ -69,8 +70,6 @@ Dependencies: pico/stdlib, hardware/i2c
 ### Extended Power Management
 - Cycle mode support  
 - Low-power wake control  
-- Temperature sensor disable  
-- Fine-grained standby control API  
 
 ### Complete Register Coverage
 - Structured access to all MPU-6050 registers  
