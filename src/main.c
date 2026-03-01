@@ -52,8 +52,8 @@ int main(void){
 
 	if(gy521.fn.reset()) printf("GY-521 got reset\n");
 
-	gy521.conf.sleep = false;
 	gy521.conf.scaled = true;
+	gy521.conf.sleep = false;
 	gy521.conf.accel.fsr = GY521_ACCEL_FSR_SEL_8G;
 	gy521.conf.gyro.fsr = GY521_GYRO_FSR_SEL_2000DPS;
 	gy521.conf.gyro.x.clksel = true;

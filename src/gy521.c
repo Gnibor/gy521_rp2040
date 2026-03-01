@@ -77,31 +77,27 @@
 bool gy521_test_connection(void);
 bool gy521_read_reg(uint8_t reg, uint8_t *out, uint8_t how_many);
 bool gy521_reset(void);
-bool gy521_sleep(void); // true = enable, false = disable
-bool gy521_set_fsr(void); // automatically calculate scaling factors
+bool gy521_sleep(void); // Set sleep configuration
+bool gy521_set_fsr(void);
 bool gy521_set_clksel(void);
 bool gy521_set_stby(void);
-bool gy521_calibrate_gyro(uint8_t sample); // calibrate gyro offsets
+bool gy521_calibrate_gyro(uint8_t sample); // calibrate gyro offsets (sample=10)
 bool gy521_read(uint8_t accel_temp_gyro); // 0=all 1=accel 2=temp 3=gyro
 
 // ========================
 // === Global Variables ===
 // ========================
-// Globaler Pointer auf das aktive GY521-Device
-static gy521_s *g_gy521 = NULL;
-
-static uint8_t g_gy521_cache[14]={0}; // temporary buffer for I2C reads
-static int g_gy521_ret_cache = 0;
+static gy521_s *g_gy521 = NULL; // Global pointer to the aktiv GY521-Device
+static uint8_t g_gy521_cache[14] = {0}; // Temporary buffer for I2C reads
+static int g_gy521_ret_cache = 0; // Temporary buffer for return values
 
 // =========================
 // === Set device to use ===
 // =========================
-// to set this device as used device for fn.
-bool gy521_use(gy521_s *device) {
-	// Prüfe ob Pointer gültig ist
-	if (device == NULL) {
-		return false;
-	}
+// to set device as used device for fn.*
+bool gy521_use(gy521_s *device){
+	if (device == NULL) return false; // Check if device is set
+
 	g_gy521 = device;
 
 	return true;
@@ -126,8 +122,7 @@ gy521_s gy521_init(uint8_t addr){
 		gpio_set_dir(GY521_INT_PIN, GPIO_IN);
 	}
 
-	// Initalize device struct and function pointers
-	gy521_s gy521 = {0};
+	gy521_s gy521 = {0}; // Initalize device struct and function pointers
 
 	if(!addr) gy521.conf.addr = GY521_I2C_ADDR_GND;
 	else gy521.conf.addr = addr;
@@ -246,7 +241,7 @@ bool gy521_sleep(void){
 	else g_gy521_cache[0] &= ~GY521_TEMP_DIS;
 
 	g_gy521_ret_cache = i2c_write_blocking(GY521_I2C_PORT, g_gy521->conf.addr, (uint8_t[]){GY521_REG_PWR_MGMT_1, g_gy521_cache[0]}, 2, false);
-	if(g_gy521_ret_cache!= 2) return false;
+	if(g_gy521_ret_cache != 2) return false;
 
 	return true;
 }
