@@ -247,3 +247,4 @@ typedef struct gy521_s{
  * Returns a fully initialized gy521_s struct with function pointers and default values.
  */
 gy521_s gy521_init(uint8_t addr);
+bool gy521_use(gy521_s *device);

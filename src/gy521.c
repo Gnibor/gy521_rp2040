@@ -90,76 +90,22 @@ bool gy521_read(uint8_t accel_temp_gyro); // 0=all, scaled=true -> G/°C/°/s
 // Globaler Pointer auf das aktive GY521-Device
 static gy521_s *g_gy521 = NULL;
 
-static gy521_s *g_gy521_device_stack[GY521_MAX_DEVICES] = {NULL};
-static int g_gy521_stack_ptr = -1;  // -1 bedeutet: Stack leer
 static uint8_t g_gy521_cache[14]={0}; // temporary buffer for I2C reads
 static uint8_t g_gy521_ret_chache = 0;
 
 /*
- * ERKLÄRUNG: gy521_push()
- *
- * g_gy521_stack_ptr zeigt auf das aktuelle Element:
- *   -1 = leer
- *    0 = 1 Device
- *    1 = 2 Devices (wenn GY521_MAX_DEVICES >= 2)
- *
- * Beispiel: 2 Devices
- *   gy521_push(&sensor1)  →  g_gy521_stack_ptr = 0
- *   gy521_push(&sensor2)  →  g_gy521_stack_ptr = 1
- *   gy521_pop()           →  g_gy521_stack_ptr = 0  (sensor1 aktiv)
- *   gy521_pop()           →  g_gy521_stack_ptr = -1 (leer)
+ * ERKLÄRUNG: gy521_use(&d1_gy521);
+ * g_gy521 = &d1_gy521;
+ * to set this device as used device
  */
-bool gy521_push(gy521_s *device) {
-    // Prüfe ob Pointer gültig ist
-    if (device == NULL) {
-        return false;
-    }
+bool gy521_use(gy521_s *device) {
+	// Prüfe ob Pointer gültig ist
+	if (device == NULL) {
+		return false;
+	}
+	g_gy521 = device;
 
-    // Prüfe ob noch Platz im Stack ist
-    if (g_gy521_stack_ptr >= GY521_MAX_DEVICES - 1) {
-        return false;  // Stack ist voll!
-    }
-
-    // Neues Device hinzufügen
-    g_gy521_stack_ptr++;
-    g_gy521_device_stack[g_gy521_stack_ptr] = device;
-
-    return true;
-}
-
-/*
- * ERKLÄRUNG: gy521_pop()
- *
- * Entfernt das aktive Device vom Stack
- * und macht das vorherige wieder aktiv (wenn vorhanden).
- */
-bool gy521_pop(void) {
-    // Prüfe ob Stack nicht leer ist
-    if (g_gy521_stack_ptr < 0) {
-        return false;  // Nichts zum Poppen
-    }
-
-    // Device aus dem Stack entfernen
-    g_gy521_device_stack[g_gy521_stack_ptr] = NULL;
-    g_gy521_stack_ptr--;
-
-    return true;
-}
-
-/*
- * ERKLÄRUNG: gy521_current()
- *
- * Gibt das aktive Device zurück.
- * Dies ist wichtig für alle Wrapper-Funktionen!
- */
-gy521_s* gy521_current(void) {
-    // Wenn Stack leer ist (-1), geben wir NULL zurück
-    if (g_gy521_stack_ptr < 0) {
-        return NULL;
-    }
-
-    // Sonst geben wir das aktuelle Device zurück
-    return g_gy521_device_stack[g_gy521_stack_ptr];
+	return true;
 }
 
 // ========================
@@ -201,6 +147,7 @@ gy521_s gy521_init(uint8_t addr){
 	gy521.fn.clksel = &gy521_set_clksel;
 
 	g_gy521 = &gy521;
+
 	return gy521;
 }
 
