@@ -66,11 +66,13 @@
 #define GY521_INT_PIN 24  // Optional interrupt pin
 #endif
 
-#ifndef GY521_I2C_ADDR
-#define GY521_I2C_ADDR 0x68 // Default I2C address for GY-521(MPU-6050) (AD0 pin -> Gnd)
+#ifndef GY521_MAX_DEVICES
+#define GY521_MAX_DEVICES 2
 #endif
 
-#define GY521_MAX_DEVICES 2
+#define GY521_I2C_ADDR_GND 0x68 // Default I2C address for GY-521(MPU-6050) (AD0 pin -> Gnd)
+#define GY521_I2C_ADDR_VCC 0x69 // Default I2C address for GY-521(MPU-6050) (AD0 pin -> Vcc)
+
 
 /*
  * Identifiers for selecting specific sensor blocks
@@ -183,6 +185,7 @@ typedef struct gy521_s{
 		uint8_t clksel; // Clock source
 		bool reset; // Device reset flag
 		bool scaled;
+		uint8_t addr; // Device Address
 
 		struct{
 			uint8_t fsr; // Full scale range setting
@@ -243,4 +246,4 @@ typedef struct gy521_s{
  * Initializes the I²C connection and default configuration.
  * Returns a fully initialized gy521_s struct with function pointers and default values.
  */
-gy521_s gy521_init(void);
+gy521_s gy521_init(uint8_t addr);

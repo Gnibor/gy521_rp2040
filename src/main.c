@@ -36,11 +36,11 @@
 
 int main(void){
 	stdio_init_board();
-	gy521_s gy521 = gy521_init();
+	gy521_s gy521 = gy521_init(GY521_I2C_ADDR_GND);
 	int retries = 3;
 	bool connected = false;
+	printf("Try connecting GY-521...\n");
 	while(retries--){
-		printf("Try connecting GY-521...\n");
 		connected = gy521.fn.test_connection();
 		if(connected) break;
 
