@@ -128,6 +128,14 @@ typedef struct{
 } gy521_axis_raw_t;
 
 /*
+ * Axis offset as calculated from
+ * the calibrate function
+ */
+typedef struct{
+	int32_t x, y, z;
+} gy521_offset_t;
+
+/*
  * Scaled axis values
  * - Accel: g-force
  * - Gyro: degrees per second
@@ -172,6 +180,7 @@ typedef struct gy521_s{
 		bool sleep; // Device sleep state
 		uint8_t clksel; // Clock source
 		bool reset; // Device reset flag
+		bool scaled;
 
 		struct{
 			uint8_t fsr; // Full scale range setting
@@ -189,7 +198,7 @@ typedef struct gy521_s{
 		struct{
 			uint8_t fsr;
 			float fsr_divider;
-			uint8_t calibrate_samples;
+			gy521_offset_t offset;
 
 			struct{ bool clksel, stby; } x;
 			struct{ bool clksel, stby; } y;
@@ -203,9 +212,9 @@ typedef struct gy521_s{
 	struct{
 		bool (*test_connection)(void);
 		bool (*reset)(void);
-		bool (*sleep)(struct gy521_s (*));
+		bool (*sleep)(void);
 		bool (*read)(struct gy521_s (*), uint8_t, bool);
-		bool (*set_fsr)(struct gy521_s (*));
+		bool (*set_fsr)();
 		bool (*set_stby)(struct gy521_s (*));
 		bool (*clksel)(struct gy521_s (*));
 
@@ -218,7 +227,7 @@ typedef struct gy521_s{
 		} temp;
 
 		struct{
-			bool (*calibrate)(uint8_t);
+			bool (*calibrate)(struct gy521_s (*), uint8_t);
 			//bool (*sleep)(void);
 		} gyro;
 	} fn;

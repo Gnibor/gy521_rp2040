@@ -53,11 +53,11 @@ int main(void){
 	if(gy521.fn.reset()) printf("GY-521 got reset\n");
 
 	gy521.conf.sleep = false;
-	if(gy521.fn.sleep(&gy521)) printf("GY-521 sleep stop\n");
+	if(gy521.fn.sleep()) printf("GY-521 sleep stop\n");
 
 	gy521.conf.accel.fsr = GY521_ACCEL_FSR_SEL_8G;
 	gy521.conf.gyro.fsr = GY521_GYRO_FSR_SEL_2000DPS;
-	if(gy521.fn.set_fsr(&gy521)) printf("GY-521 Full-Scale-Range is set.\n");
+	if(gy521.fn.set_fsr()) printf("GY-521 Full-Scale-Range is set.\n");
 
 	gy521.conf.gyro.x.clksel = true;
 	if(gy521.fn.clksel(&gy521)) printf("GY-521 Clock Select set to GyroX\n");
@@ -65,11 +65,11 @@ int main(void){
 	gy521.conf.gyro.y.stby = true;
 	if(gy521.fn.set_stby(&gy521)) printf("YG in standby\n");
 	gy521.conf.temp.sleep = true;
-	if(gy521.fn.sleep(&gy521)) printf("temp in standby\n");
+	if(gy521.fn.sleep()) printf("temp in standby\n");
 
 	printf("Try to calibrate GY-521\n");
 	sleep_ms(2000);
-	if(gy521.fn.gyro.calibrate(15)) printf("GY-521 is now calibrated.\n");
+	if(gy521.fn.gyro.calibrate(&gy521, 15)) printf("GY-521 is now calibrated.\n");
 	else printf("GY-521 could not be calibrated.\n");
 
 	while(1){
