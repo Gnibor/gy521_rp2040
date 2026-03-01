@@ -70,6 +70,8 @@
 #define GY521_I2C_ADDR 0x68 // Default I2C address for GY-521(MPU-6050) (AD0 pin -> Gnd)
 #endif
 
+#define GY521_MAX_DEVICES 2
+
 /*
  * Identifiers for selecting specific sensor blocks
  * Used in gy521_read()
