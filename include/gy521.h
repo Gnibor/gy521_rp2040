@@ -116,7 +116,7 @@
 // ========================================
 // === Low Power Wake Control bit masks ===
 // ========================================
-#define GY521_LP_WAKE_CTRL_1_25HZ 0
+#define GY521_LP_WAKE_CTRL_1_25HZ 0x00
 #define GY521_LP_WAKE_CTRL_5HZ (0x01 << 6)
 #define GY521_LP_WAKE_CTRL_20HZ (0x02 << 6)
 #define GY521_LP_WAKE_CTRL_40HZ (0x03 << 6)
@@ -174,7 +174,7 @@ typedef struct gy521_s{
 		} gyro;
 
 		struct{
-			int16_t raw; // Raw temperature register
+			int16_t raw; // Raw temperature values
 			float celsius; // Converted temperature in °C
 		} temp;
 	} v;
