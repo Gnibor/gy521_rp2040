@@ -213,10 +213,10 @@ typedef struct gy521_s{
 		bool (*test_connection)(void);
 		bool (*reset)(void);
 		bool (*sleep)(void);
-		bool (*read)(struct gy521_s (*), uint8_t, bool);
-		bool (*set_fsr)();
-		bool (*set_stby)(struct gy521_s (*));
-		bool (*clksel)(struct gy521_s (*));
+		bool (*read)(uint8_t);
+		bool (*set_fsr)(void);
+		bool (*stby)(void);
+		bool (*clksel)(void);
 
 		struct{
 			//bool (*sleep)(void);
@@ -227,7 +227,7 @@ typedef struct gy521_s{
 		} temp;
 
 		struct{
-			bool (*calibrate)(struct gy521_s (*), uint8_t);
+			bool (*calibrate)(uint8_t);
 			//bool (*sleep)(void);
 		} gyro;
 	} fn;

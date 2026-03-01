@@ -60,20 +60,22 @@ int main(void){
 	if(gy521.fn.set_fsr()) printf("GY-521 Full-Scale-Range is set.\n");
 
 	gy521.conf.gyro.x.clksel = true;
-	if(gy521.fn.clksel(&gy521)) printf("GY-521 Clock Select set to GyroX\n");
+	if(gy521.fn.clksel()) printf("GY-521 Clock Select set to GyroX\n");
 
 	gy521.conf.gyro.y.stby = true;
-	if(gy521.fn.set_stby(&gy521)) printf("YG in standby\n");
+	if(gy521.fn.stby()) printf("YG in standby\n");
 	gy521.conf.temp.sleep = true;
 	if(gy521.fn.sleep()) printf("temp in standby\n");
 
+	gy521.conf.scaled = true;
+
 	printf("Try to calibrate GY-521\n");
 	sleep_ms(2000);
-	if(gy521.fn.gyro.calibrate(&gy521, 15)) printf("GY-521 is now calibrated.\n");
+	if(gy521.fn.gyro.calibrate(15)) printf("GY-521 is now calibrated.\n");
 	else printf("GY-521 could not be calibrated.\n");
 
 	while(1){
-		if(gy521.fn.read(&gy521, 0, true))
+		if(gy521.fn.read(0))
 			printf("G=X:%6.3f Y:%6.3f Z:%6.3f | °C=%6.2f | °/s=X:%9.3f Y:%9.3f Z:%9.3f\n", 
 				gy521.v.accel.g.x, gy521.v.accel.g.y, gy521.v.accel.g.z, 
 				gy521.v.temp.celsius, 
