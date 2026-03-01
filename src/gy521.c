@@ -82,7 +82,7 @@ bool gy521_set_fsr(void); // automatically calculate scaling factors
 bool gy521_set_clksel(void);
 bool gy521_set_stby(void);
 bool gy521_calibrate_gyro(uint8_t sample); // calibrate gyro offsets
-bool gy521_read(uint8_t accel_temp_gyro); // 0=all, scaled=true -> G/°C/°/s
+bool gy521_read(uint8_t accel_temp_gyro); // 0=all 1=accel 2=temp 3=gyro
 
 // ========================
 // === Global Variables ===
@@ -93,11 +93,10 @@ static gy521_s *g_gy521 = NULL;
 static uint8_t g_gy521_cache[14]={0}; // temporary buffer for I2C reads
 static uint8_t g_gy521_ret_chache = 0;
 
-/*
- * ERKLÄRUNG: gy521_use(&d1_gy521);
- * g_gy521 = &d1_gy521;
- * to set this device as used device
- */
+// =========================
+// === Set device to use ===
+// =========================
+// to set this device as used device for fn.
 bool gy521_use(gy521_s *device) {
 	// Prüfe ob Pointer gültig ist
 	if (device == NULL) {
