@@ -60,7 +60,7 @@ int main(void){
 
 	if(gy521.fn.sleep()) printf("GY-521 sleep stop\n");
 	if(gy521.fn.fsr()) printf("GY-521 Full-Scale-Range is set.\n");
-	if(gy521.fn.clksel()) printf("GY-521 Clock Select set to GyroX\n");
+	if(gy521.fn.clk_sel()) printf("GY-521 Clock Select set to GyroX\n");
 
 	//gy521.conf.gyro.y.stby = true;
 	//if(gy521.fn.stby()) printf("YG in standby\n");

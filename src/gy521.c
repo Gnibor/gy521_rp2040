@@ -143,7 +143,7 @@ gy521_s gy521_init(uint8_t addr){
 	gy521.fn.gyro.calibrate = &gy521_calibrate_gyro;
 	gy521.fn.fsr = &gy521_set_fsr;
 	gy521.fn.stby = &gy521_set_stby;
-	gy521.fn.clksel = &gy521_set_clksel;
+	gy521.fn.clk_sel = &gy521_set_clksel;
 
 	g_gy521 = &gy521;
 

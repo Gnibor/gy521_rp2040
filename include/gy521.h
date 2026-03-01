@@ -223,7 +223,7 @@ typedef struct gy521_s{
 		bool (*read)(uint8_t);
 		bool (*fsr)(void);
 		bool (*stby)(void);
-		bool (*clksel)(void);
+		bool (*clk_sel)(void);
 
 		struct{
 			//bool (*sleep)(void);
